@@ -19,8 +19,8 @@ RIGHT_MOTOR = Motor("D")
 # Buttons
 BUTTON = TouchSensor(3)
 
-# Grab state
-grab_on = False
+# Temp start trigger
+start = False
 
 IN_POWER = 50
 OUT_POWER = 30
@@ -134,16 +134,16 @@ def turn_90(direction, target=TURNING_ENCODER_TARGET):
 if __name__ == "__main__":
     while True:
         if BUTTON.is_pressed():
-            grab_on = not grab_on
+            start = not start 
             time.sleep(0.3)
 
-        if grab_on:
+        if start:
             grab_in_forward(move_power=10)
             time.sleep(3)
             grab_out()
             time.sleep(3)
             grab_out(OUT_POWER_2, OUT_TIME_2)
-            grab_on = False
+            start = False
         else:
             FIRST_MOTOR.set_power(0)
             SECOND_MOTOR.set_power(0)
