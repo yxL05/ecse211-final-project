@@ -1,4 +1,7 @@
-from utils.brick import Motor
+from utils.brick import TouchSensor, Motor
+import time
+
+DELAY = 0.3
 
 # Drum motor initialization
 FIRST_MOTOR = Motor("A")
@@ -6,19 +9,32 @@ SECOND_MOTOR = Motor("B")
 
 # Drum state
 POWER = 50
+drum_on = False
+direction = 1
 
-def start_drum(direction=1, power=POWER):
-    FIRST_MOTOR.set_power(power * direction)
-    SECOND_MOTOR.set_power(power * direction)
-
-
-def stop_drum():
-    FIRST_MOTOR.set_power(0)
-    SECOND_MOTOR.set_power(0)
+# Sensor initialization
+BUTTON1 = TouchSensor(3)
+BUTTON2 = TouchSensor(4)
 
 
-def update_drum(drum_on, direction=1, power=POWER):
+def handle_drum_inputs():
+    global drum_on, direction
+
+    # Toggle spinning
+    if BUTTON1.is_pressed():
+        drum_on = not drum_on
+        time.sleep(DELAY)
+
+    # Change direction
+    if BUTTON2.is_pressed():
+        direction *= -1
+        time.sleep(DELAY)
+
+
+def update_drum(power=POWER):
     if drum_on:
-        start_drum(direction, power)
+        FIRST_MOTOR.set_power(power * direction)
+        SECOND_MOTOR.set_power(power * direction)
     else:
-        stop_drum()
+        FIRST_MOTOR.set_power(0)
+        SECOND_MOTOR.set_power(0)
