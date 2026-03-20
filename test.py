@@ -26,8 +26,8 @@ BUTTON1 = TouchSensor(3)
 BUTTON2 = TouchSensor(4)
 
 # Turning constants
-TURNING_ENCODER_TARGET = 305     
-TURNING_ENCODER_TARGET_RIGHT = 310
+TURNING_ENCODER_TARGET = 400 
+TURNING_ENCODER_TARGET_RIGHT = 400
 CORRECTION_FACTOR = 0.6
 MAX_CORRECTION = 8              
 
@@ -102,6 +102,7 @@ def go_forward(duration=1.0, power=40):
 
 # Experimenting
 if __name__ == "__main__":
+    i = 0
     while True:
         # Toggle spinning
         if BUTTON1.is_pressed():
@@ -121,7 +122,9 @@ if __name__ == "__main__":
             FIRST_MOTOR.set_power(0)
             SECOND_MOTOR.set_power(0)
 
-        turn_90("left")
-        turn_90("right", TURNING_ENCODER_TARGET_RIGHT) 
-        
+        if (i <= 4):
+            turn_90("left")
+            # turn_90("right", TURNING_ENCODER_TARGET_RIGHT) 
+        i += 1
+
         time.sleep(0.01)
