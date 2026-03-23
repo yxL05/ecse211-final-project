@@ -376,6 +376,14 @@ def turn(direction, angle=90):
     )
     log_turn("=" * 80)
 
+def global_turn(direction, target_angle):
+    curr_angle = get_stable_gyro_angle()
+    if curr_angle is None:
+        raise RuntimeError("Gyro unavailable")
+    angle = target_angle - curr_angle if direction == "right" else curr_angle - target_angle
+    log_turn(f"Global turn: current={curr_angle:.2f}  target={target_angle:.2f} angle = {angle:.2f}")
+    turn(direction, angle)
+    safe_sleep(0.1)
 
 def go_forward_target_slow(target_degrees, max_power=40, kp_heading=1.2, min_power=25, slowdown_distance=200):
     check_emergency()

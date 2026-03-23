@@ -7,7 +7,8 @@ from test_gyro import (
     EMERGENCY_BUTTON,
     check_emergency,
     safe_sleep,
-    stop_all
+    stop_all,
+    global_turn,
 )
 
 DISTANCE = 400
@@ -67,6 +68,27 @@ def right_square_test():
     turn("right")
     safe_sleep(1)
 
+def global_turn_test():
+    global_turn("right", 90)
+    safe_sleep(1)
+    global_turn("right", 180)
+    safe_sleep(1)
+    global_turn("right", 270)
+    safe_sleep(1)
+    global_turn("right", 360)
+    safe_sleep(1)
+    global_turn("left", 270)
+    safe_sleep(1)
+    global_turn("left", 180)
+    safe_sleep(1)
+    global_turn("left", 0)
+    safe_sleep(1)
+    global_turn("left", -90)
+    safe_sleep(1)
+    global_turn("left", -180)
+    safe_sleep(1)
+    global_turn("right", 0)
+    safe_sleep(1)
 
 if __name__ == "__main__":
     try:
