@@ -9,6 +9,7 @@ from test_gyro import (
     safe_sleep,
     stop_all,
     global_turn,
+    color_test,
 )
 
 DISTANCE = 400
@@ -123,7 +124,8 @@ if __name__ == "__main__":
                 safe_sleep(0.3)
 
             if start:
-                straight_test()
+                # straight_test()
+                color_test()
 
                 start = False
 

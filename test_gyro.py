@@ -477,6 +477,12 @@ def go_forward_target_slow(
 
     stop_drive()
 
+def color_test():
+    while True:
+        (r, g, b) = COLOR.get_rgb()
+        print(f"Color RGB: R={r} G={g} B={b}")
+        safe_sleep(0.5)
+
 # if __name__ == "__main__":
 #     try:
 #         while True:
