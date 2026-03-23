@@ -1,10 +1,13 @@
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import time
 from test_gyro import (
     go_forward_target_slow,
     turn,
     BUTTON,
-    EMERGENCY_BUTTON,
     check_emergency,
     safe_sleep,
     stop_all,
@@ -12,10 +15,10 @@ from test_gyro import (
     color_test,
 )
 
-DISTANCE = 400
+DISTANCE = 1000
 MAX_POWER = 40
-MIN_POWER = 10
-SLOWDOWN_DIST = 10
+MIN_POWER = 25
+SLOWDOWN_DIST = 300
 KP_HEADING = 1.2
 
 def straight_test():
@@ -124,8 +127,8 @@ if __name__ == "__main__":
                 safe_sleep(0.3)
 
             if start:
-                # straight_test()
-                color_test()
+                orange_test()
+                bed_test()
 
                 start = False
 

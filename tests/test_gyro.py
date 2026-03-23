@@ -13,6 +13,7 @@ from utils.brick import (
 )
 from utils import sound
 import time
+import sys
 
 DELAY = 0.3
 
@@ -23,12 +24,12 @@ LEFT_MOTOR = Motor("C")
 RIGHT_MOTOR = Motor("D")
 
 # Sensors
-GYRO = EV3GyroSensor(1, mode="both")
-COLOR = EV3ColorSensor(2)
+GYRO = EV3GyroSensor(4, mode="both")
+COLOR = EV3ColorSensor(1)
 
 # Buttons
-BUTTON = TouchSensor(3)
-EMERGENCY_BUTTON = TouchSensor(4)
+BUTTON = TouchSensor(2)
+#EMERGENCY_BUTTON = TouchSensor(4)
 
 # Temp start trigger
 start = False
@@ -100,12 +101,12 @@ def stop_all():
 
 
 def check_emergency():
-    global emergency_stop
-    if EMERGENCY_BUTTON.is_pressed():
-        emergency_stop = True
-        stop_all()
-        raise EmergencyStop("Emergency stop pressed")
-
+    #global emergency_stop
+    #if EMERGENCY_BUTTON.is_pressed():
+     #   emergency_stop = True
+      #  stop_all()
+       # raise EmergencyStop("Emergency stop pressed")
+    return
 
 def safe_sleep(duration, interval=0.01):
     end_time = time.time() + duration
@@ -230,10 +231,10 @@ def set_turn_power(direction, base_power, translation_correction):
 
 def is_color(color, r, g, b):
     if color == "red":
-        return r > 230 and r > (g * 6) and r > (b * 7)
+        return r > 140 and r > (g * 6) and r > (b * 7)
 
     elif color == "green":
-        return g > 200 and g > (r * 2) and g > (b * 2)
+        return g > 180 and g > (r * 1.5) and g > (b * 5.5)
 
     elif color == "orange":
         return r > 200 and g > 100 and r > (b * 3) and g > (b * 2)
@@ -425,20 +426,26 @@ def go_forward_target_slow(
     target_angle = get_stable_gyro_angle()
     if target_angle is None:
         raise RuntimeError("Gyro unavailable")
+    
+    DETECTED_COLOR = None
 
     while True:
         check_emergency()
-
+       
         ############ COLOR STUFF
         if target_color is not None:
             (r, g, b) = COLOR.get_rgb()
+     
             if target_color == "bed":
                 if is_color("red", r, g, b):
-                    print("Target color detected: bed")
-                    return "red"
+                    print("Target color detected: red")
+                    DETECTED_COLOR = "red"
+                    break
                 if is_color("green", r, g, b):
                     print("Target color detected: green")
-                    return "green"
+                    DETECTED_COLOR = "green"
+                    break
+
             elif is_color("orange", r, g, b):
                 print("Target color detected: orange")
                 break
@@ -467,10 +474,8 @@ def go_forward_target_slow(
         current_angle = get_gyro_angle()
         if current_angle is None:
             continue
-
         heading_error = target_angle - current_angle
-        correction = kp_heading * heading_error * 0.9
-
+        correction = kp_heading * heading_error * 0.90
         left_power = clamp(power + correction, -100, 100)
         right_power = clamp(power - correction, -100, 100)
 
@@ -480,6 +485,8 @@ def go_forward_target_slow(
         time.sleep(0.01)
 
     stop_drive()
+    return DETECTED_COLOR
+
 
 def color_test():
     while True:
