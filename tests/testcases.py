@@ -1,6 +1,6 @@
 import sys
 import time
-from test_gyro import (
+from .test_gyro import (
     go_forward_target_slow,
     turn,
     BUTTON,
