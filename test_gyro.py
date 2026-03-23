@@ -465,7 +465,7 @@ def go_forward_target_slow(
             continue
 
         heading_error = target_angle - current_angle
-        correction = kp_heading * heading_error
+        correction = kp_heading * heading_error * 0.9
 
         left_power = clamp(power + correction, -100, 100)
         right_power = clamp(power - correction, -100, 100)
