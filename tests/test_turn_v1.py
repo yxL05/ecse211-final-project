@@ -1,11 +1,16 @@
-from ..utils.brick import (
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from utils.brick import (
     TouchSensor,
     EV3UltrasonicSensor,
     EV3ColorSensor,
     Motor,
     wait_ready_sensors
 )
-from ..utils import sound
+from utils import sound
 import time
 
 DELAY = 0.3

@@ -1,4 +1,9 @@
-from ..utils.brick import TouchSensor, Motor
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from utils.brick import TouchSensor, Motor
 import time
 
 DELAY = 0.3
