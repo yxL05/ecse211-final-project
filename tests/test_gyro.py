@@ -1,4 +1,4 @@
-from utils.brick import (
+from ..utils.brick import (
     TouchSensor,
     EV3UltrasonicSensor,
     EV3ColorSensor,
@@ -6,7 +6,7 @@ from utils.brick import (
     Motor,
     wait_ready_sensors
 )
-from utils import sound
+from ..utils import sound
 import time
 import sys
 

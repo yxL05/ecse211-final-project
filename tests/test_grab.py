@@ -1,11 +1,11 @@
-from utils.brick import (
+from ..utils.brick import (
     TouchSensor,
     EV3UltrasonicSensor,
     EV3ColorSensor,
     Motor,
     wait_ready_sensors
 )
-from utils import sound
+from ..utils import sound
 import time
 
 DELAY = 0.3

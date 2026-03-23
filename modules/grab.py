@@ -1,4 +1,4 @@
-from utils.brick import TouchSensor, Motor
+from ..utils.brick import TouchSensor, Motor
 import time
 
 DELAY = 0.3

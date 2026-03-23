@@ -1,11 +1,11 @@
-from utils.brick import (
+from ..utils.brick import (
     TouchSensor,
     EV3UltrasonicSensor,
     EV3ColorSensor,
     EV3GyroSensor,
     Motor,
 )
-from utils import sound
+from ..utils import sound
 
 # Drum motor initialization
 LEFT_CONTAINMENT_MOTOR = Motor("A")
