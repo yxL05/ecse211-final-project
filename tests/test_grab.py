@@ -16,10 +16,10 @@ import time
 DELAY = 0.3
 
 # Drum motor initialization
-FIRST_MOTOR = Motor("A")
-SECOND_MOTOR = Motor("B")
-LEFT_MOTOR = Motor("C")
-RIGHT_MOTOR = Motor("D")
+LEFT_CONTAINMENT_MOTOR = Motor("A")
+RIGHT_CONTAINMENT_MOTOR = Motor("B")
+LEFT_LOCOMOTION_MOTOR = Motor("C")
+RIGHT_LOCOMOTION_MOTOR = Motor("D")
 
 # Buttons
 BUTTON = TouchSensor(3)
@@ -42,102 +42,42 @@ MAX_CORRECTION = 8
 
 wait_ready_sensors()
 
-def clamp(value, min_value, max_value):
-    return max(min_value, min(value, max_value))
+def _stop_drive():
+    LEFT_LOCOMOTION_MOTOR.set_power(0)
+    RIGHT_LOCOMOTION_MOTOR.set_power(0)
 
-def stop_drive():
-    LEFT_MOTOR.set_power(0)
-    RIGHT_MOTOR.set_power(0)
+def _stop_grab():
+    LEFT_CONTAINMENT_MOTOR.set_power(0)
+    RIGHT_CONTAINMENT_MOTOR.set_power(0)
 
-def stop_grab():
-    FIRST_MOTOR.set_power(0)
-    SECOND_MOTOR.set_power(0)
+def _suck_forward(move_power, grab_power=IN_POWER, t=IN_TIME):    
+    LEFT_CONTAINMENT_MOTOR.set_power(grab_power)
+    RIGHT_CONTAINMENT_MOTOR.set_power(grab_power)
 
-def grab_in_forward(move_power, grab_power=IN_POWER, t=IN_TIME):    
-    FIRST_MOTOR.set_power(grab_power)
-    SECOND_MOTOR.set_power(grab_power)
-
-    LEFT_MOTOR.set_power(move_power)
-    RIGHT_MOTOR.set_power(move_power)
+    LEFT_LOCOMOTION_MOTOR.set_power(move_power)
+    RIGHT_LOCOMOTION_MOTOR.set_power(move_power)
 
     time.sleep(t) 
 
-    stop_drive()
-    stop_grab()
+    _stop_drive()
+    _stop_grab()
 
-def grab_in(grab_power=IN_POWER, t=IN_TIME):    
-    FIRST_MOTOR.set_power(grab_power)
-    SECOND_MOTOR.set_power(grab_power)
-
-    time.sleep(t)
-
-    stop_grab()
-
-def grab_out(power=OUT_POWER, t=OUT_TIME):
-    FIRST_MOTOR.set_power(power * -1)
-    SECOND_MOTOR.set_power(power * -1)
+def _blow(power=OUT_POWER, t=OUT_TIME):
+    LEFT_CONTAINMENT_MOTOR.set_power(power * -1)
+    RIGHT_CONTAINMENT_MOTOR.set_power(power * -1)
 
     time.sleep(t) 
 
-    stop_grab()
+    _stop_grab()
 
-def go_forward(duration, power):
-    LEFT_MOTOR.set_power(power)
-    RIGHT_MOTOR.set_power(power)
-    time.sleep(duration)
-    stop_drive()
+def suck_forward():
+    _suck_forward(move_power=10)
 
-def get_turn_power(progress, target):
-    if progress < target * 0.7:
-        return 35
-    elif progress < target * 0.9:
-        return 20
-    elif progress < target:
-        return 10
-    else:
-        return 0
+def blow_1():
+    _blow()
 
-def turn_90(direction, target=TURNING_ENCODER_TARGET):
-    if direction not in ("left", "right"):
-        raise ValueError("direction must be 'left' or 'right'")
-
-    LEFT_MOTOR.reset_encoder()
-    RIGHT_MOTOR.reset_encoder()
-
-    while True:
-        left = abs(LEFT_MOTOR.get_encoder())
-        right = abs(RIGHT_MOTOR.get_encoder())
-
-        # Average amount turned so far
-        progress = (left + right) / 2
-
-        if progress >= target:
-            break
-
-        base_power = get_turn_power(progress, target)
-
-        # Keep both wheels rotating by similar amounts
-        error = left - right
-        correction = clamp(error * CORRECTION_FACTOR, -MAX_CORRECTION, MAX_CORRECTION)
-
-        if direction == "right":
-            # left forward, right backward
-            left_power = base_power - correction
-            right_power = -(base_power + correction)
-        else:
-            # left backward, right forward
-            left_power = -(base_power - correction)
-            right_power = base_power + correction
-
-        LEFT_MOTOR.set_power(left_power)
-        RIGHT_MOTOR.set_power(right_power)
-
-        print(f"left: {left}")
-        print(f"right: {right}")
-
-        time.sleep(0.01)
-
-    stop_drive()
+def blow_2():
+    _blow(OUT_POWER_2, OUT_TIME_2)
 
 if __name__ == "__main__":
     while True:
@@ -146,15 +86,15 @@ if __name__ == "__main__":
             time.sleep(0.3)
 
         if grab_on:
-            grab_in_forward(move_power=10)
+            _suck_forward(move_power=10)
             time.sleep(3)
-            grab_out()
+            _blow()
             time.sleep(3)
-            grab_out(OUT_POWER_2, OUT_TIME_2)
+            _blow(OUT_POWER_2, OUT_TIME_2)
             grab_on = False
         else:
-            FIRST_MOTOR.set_power(0)
-            SECOND_MOTOR.set_power(0)
-            stop_drive()
+            LEFT_CONTAINMENT_MOTOR.set_power(0)
+            RIGHT_CONTAINMENT_MOTOR.set_power(0)
+            _stop_drive()
 
         time.sleep(0.01)

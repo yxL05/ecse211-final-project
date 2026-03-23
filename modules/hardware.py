@@ -23,5 +23,4 @@ GYRO = EV3GyroSensor(1, mode="both")
 COLOR = EV3ColorSensor(2)
 
 # Buttons
-BUTTON = TouchSensor(3)
-EMERGENCY_BUTTON = TouchSensor(4)
+EMERGENCY_BUTTON = TouchSensor(2)
