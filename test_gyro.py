@@ -377,27 +377,114 @@ def turn(direction, angle=90):
     log_turn("=" * 80)
 
 
+def go_forward_target_slow(target_degrees, max_power=40, kp_heading=1.2, min_power=25, slowdown_distance=200):
+    check_emergency()
+
+    LEFT_MOTOR.reset_encoder()
+    RIGHT_MOTOR.reset_encoder()
+
+    # Lock initial heading
+    safe_sleep(GYRO_SETTLE_TIME)
+    target_angle = get_stable_gyro_angle()
+    if target_angle is None:
+        raise RuntimeError("Gyro unavailable")
+
+    while True:
+        check_emergency()
+
+        left_enc = LEFT_MOTOR.get_encoder()
+        right_enc = RIGHT_MOTOR.get_encoder()
+
+        avg_enc = (left_enc + right_enc) / 2
+
+        remaining = target_degrees - avg_enc
+
+        if remaining <= 0:
+            break
+
+        # --- Slowdown logic ---
+        if remaining < slowdown_distance:
+            # Linear scaling of power
+            power = max(min_power, max_power * (remaining / slowdown_distance))
+        else:
+            power = max_power
+
+        # --- Gyro heading correction ---
+        current_angle = get_gyro_angle()
+        if current_angle is None:
+            continue
+
+        heading_error = target_angle - current_angle
+        correction = kp_heading * heading_error
+
+        left_power = clamp(power + correction, -100, 100)
+        right_power = clamp(power - correction, -100, 100)
+
+        LEFT_MOTOR.set_power(left_power)
+        RIGHT_MOTOR.set_power(right_power)
+
+        time.sleep(0.01)
+
+    stop_drive()
+
+# if __name__ == "__main__":
+#     try:
+#         while True:
+#             check_emergency()
+
+#             if BUTTON.is_pressed():
+#                 start = not start
+#                 safe_sleep(0.3)
+
+#             if start:
+#                 for i in range(10):
+#                     log_turn(f"\n########## TURN PAIR {i + 1} ##########")
+#                     turn("right")
+#                     safe_sleep(3)
+
+#                     turn("left")
+#                     safe_sleep(3)
+
+#                 start = False
+#             else:
+#                 stop_all()
+
+#             safe_sleep(0.01)
+
+#     except EmergencyStop:
+#         stop_all()
+#         print("EMERGENCY STOP ACTIVATED")
+#         sys.exit(1)
+
 if __name__ == "__main__":
     try:
+        start = False
+
         while True:
             check_emergency()
 
             if BUTTON.is_pressed():
-                start = not start
+                start = True
                 safe_sleep(0.3)
 
             if start:
-                for i in range(10):
-                    log_turn(f"\n########## TURN PAIR {i + 1} ##########")
-                    turn("right")
-                    safe_sleep(3)
 
-                    turn("left")
-                    safe_sleep(3)
+                DISTANCE = 300        
+                MAX_POWER = 40
+                MIN_POWER = 10
+                SLOWDOWN_DIST = 50
+                KP_HEADING = 1.2
 
-                start = False
-            else:
-                stop_all()
+                go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+                safe_sleep(1)
+                turn("left")
+                go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+                safe_sleep(1)
+                turn("right")
+                go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+                safe_sleep(1)
+
+                start = False  
 
             safe_sleep(0.01)
 
