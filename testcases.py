@@ -20,6 +20,15 @@ KP_HEADING = 1.2
 def straight_test():
     go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
 
+def backward_test():
+    go_forward_target_slow(-DISTANCE, -MAX_POWER, KP_HEADING, -MIN_POWER, SLOWDOWN_DIST)
+
+def rock_test():
+    go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+    safe_sleep(1)
+    go_forward_target_slow(-DISTANCE, -MAX_POWER, KP_HEADING, -MIN_POWER, SLOWDOWN_DIST)
+    safe_sleep(1)
+
 def turnstraight_test():
     go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
     safe_sleep(1)
@@ -88,6 +97,19 @@ def global_turn_test():
     global_turn("left", -180)
     safe_sleep(1)
     global_turn("right", 0)
+    safe_sleep(1)
+
+def orange_test():
+    go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, "orange")
+    safe_sleep(1)
+
+def backward_orange_test():
+    go_forward_target_slow(-DISTANCE, -MAX_POWER, KP_HEADING, -MIN_POWER, SLOWDOWN_DIST, "orange")
+    safe_sleep(1)
+
+def bed_test():
+    detected_color = go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, "bed")
+    print(f"Detected color: {detected_color}")
     safe_sleep(1)
 
 if __name__ == "__main__":

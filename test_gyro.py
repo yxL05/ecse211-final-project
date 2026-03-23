@@ -20,6 +20,7 @@ RIGHT_MOTOR = Motor("D")
 
 # Sensors
 GYRO = EV3GyroSensor(1, mode="both")
+COLOR = EV3ColorSensor(2)
 
 # Buttons
 BUTTON = TouchSensor(3)
@@ -223,6 +224,19 @@ def set_turn_power(direction, base_power, translation_correction):
 
     return left_power, right_power
 
+def is_color(color, r, g, b):
+    if color == "red":
+        return r > 230 and r > (g * 6) and r > (b * 7)
+
+    elif color == "green":
+        return g > 200 and g > (r * 2) and g > (b * 2)
+
+    elif color == "orange":
+        return r > 200 and g > 100 and r > (b * 3) and g > (b * 2)
+
+    else:
+        return False
+
 
 def turn(direction, angle=90):
     if direction not in ("left", "right"):
@@ -385,11 +399,22 @@ def global_turn(direction, target_angle):
     turn(direction, angle)
     safe_sleep(0.1)
 
-def go_forward_target_slow(target_degrees, max_power=40, kp_heading=1.2, min_power=25, slowdown_distance=200):
+def go_forward_target_slow(
+    target_degrees,
+    max_power=40,
+    kp_heading=1.2,
+    min_power=25,
+    slowdown_distance=200,
+    target_color=None
+):
     check_emergency()
 
     LEFT_MOTOR.reset_encoder()
     RIGHT_MOTOR.reset_encoder()
+
+    # Determine direction
+    direction = 1 if target_degrees >= 0 else -1
+    target_degrees = abs(target_degrees)
 
     # Lock initial heading
     safe_sleep(GYRO_SETTLE_TIME)
@@ -400,10 +425,25 @@ def go_forward_target_slow(target_degrees, max_power=40, kp_heading=1.2, min_pow
     while True:
         check_emergency()
 
+        ############ COLOR STUFF
+        if target_color is not None:
+            (r, g, b) = COLOR.get_rgb()
+            if target_color == "bed":
+                if is_color("red", r, g, b):
+                    print("Target color detected: bed")
+                    return "red"
+                if is_color("green", r, g, b):
+                    print("Target color detected: green")
+                    return "green"
+            elif is_color("orange", r, g, b):
+                print("Target color detected: orange")
+                break
+
         left_enc = LEFT_MOTOR.get_encoder()
         right_enc = RIGHT_MOTOR.get_encoder()
 
-        avg_enc = (left_enc + right_enc) / 2
+        # Use absolute encoder distance for progress tracking
+        avg_enc = abs((left_enc + right_enc) / 2)
 
         remaining = target_degrees - avg_enc
 
@@ -412,10 +452,12 @@ def go_forward_target_slow(target_degrees, max_power=40, kp_heading=1.2, min_pow
 
         # --- Slowdown logic ---
         if remaining < slowdown_distance:
-            # Linear scaling of power
             power = max(min_power, max_power * (remaining / slowdown_distance))
         else:
             power = max_power
+
+        # Apply direction (THIS enables backward motion)
+        power *= direction
 
         # --- Gyro heading correction ---
         current_angle = get_gyro_angle()
