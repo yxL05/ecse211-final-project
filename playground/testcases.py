@@ -15,7 +15,7 @@ from test_gyro import (
     color_test,
 )
 
-DISTANCE = 1000
+DISTANCE = 880
 MAX_POWER = 40
 MIN_POWER = 25
 SLOWDOWN_DIST = 300
@@ -30,7 +30,7 @@ def backward_test():
 def rock_test():
     go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
     safe_sleep(1)
-    go_forward_target_slow(-DISTANCE, -MAX_POWER, KP_HEADING, -MIN_POWER, SLOWDOWN_DIST)
+    go_forward_target_slow(-DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
     safe_sleep(1)
 
 def turnstraight_test():

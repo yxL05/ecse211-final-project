@@ -1,12 +1,19 @@
 import sys
 from pathlib import Path
-
+import time
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from modules.hardware import *
 
 class EmergencyStop(Exception):
     pass
+
+def safe_sleep(duration, interval=0.01):
+    end_time = time.time() + duration
+    while time.time() < end_time:
+        check_emergency()
+        remaining = end_time - time.time()
+        time.sleep(min(interval, remaining))
 
 def stop_drive():
     LEFT_LOCOMOTION_MOTOR.set_power(0)
