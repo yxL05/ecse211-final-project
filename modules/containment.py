@@ -27,6 +27,7 @@ OUT_TIME_2 = 5
 
 GREEN = "green"
 ORANGE = "orange"
+BED = "bed"
 
 BLOW1 = True
 BLOW2 = True
@@ -37,7 +38,6 @@ MAX_POWER = 30
 MIN_POWER = 15
 SLOWDOWN_DIST = 300
 KP_HEADING = 1.2
-SEARCH_DISTANCE = 880
 
 def _suck_forward(move_power, grab_power=IN_POWER, t=IN_TIME):    
     LEFT_CONTAINMENT_MOTOR.set_power(grab_power)
