@@ -15,6 +15,14 @@ from test_gyro import (
     color_test,
 )
 
+from utils.brick import (
+    TouchSensor,
+    EV3UltrasonicSensor,
+    EV3ColorSensor,
+    Motor,
+    wait_ready_sensors,
+)
+
 DISTANCE = 1000
 MAX_POWER = 40
 MIN_POWER = 25
@@ -118,6 +126,7 @@ def bed_test():
 
 if __name__ == "__main__":
     try:
+        wait_ready_sensors()
         start = False
         while True:
             check_emergency()

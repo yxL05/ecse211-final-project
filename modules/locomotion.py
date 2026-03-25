@@ -8,6 +8,14 @@ from modules.hardware import *
 import time
 from modules.stop import *
 
+from utils.brick import (
+    TouchSensor,
+    EV3UltrasonicSensor,
+    EV3ColorSensor,
+    Motor,
+    wait_ready_sensors,
+)
+
 start = False
 emergency_stop = False
 
@@ -117,7 +125,7 @@ def _is_color(color, r, g, b):
         return g > 180 and g > (r * 1.5) and g > (b * 5.5)
 
     elif color == "orange":
-        return r > 200 and g < 100 and r > (b * 3) and g > (b * 2)
+        return r > 200 and g < 100 and b < 25 and g > 80
 
     else:
         return False
@@ -254,6 +262,7 @@ def go_forward_target_slow(
     DETECTED_COLOR = None
 
     while True:
+        wait_ready_sensors()
         check_emergency()
        
         ############ COLOR STUFF

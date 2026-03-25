@@ -24,3 +24,9 @@ COLOR = EV3ColorSensor(2)
 
 # Buttons
 EMERGENCY_BUTTON = TouchSensor(2)
+
+# Sounds
+SOUND = sound.Sound(duration=0.3, pitch="A4", volume=100)
+def play_sound():
+    SOUND.play()
+    SOUND.wait_done()
