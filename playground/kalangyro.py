@@ -1,7 +1,4 @@
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+TESTD1 = 380
 
 from utils.brick import (
     TouchSensor,
@@ -17,6 +14,7 @@ import sys
 
 DELAY = 0.3
 
+SOUND = sound.Sound(duration=0.3, pitch="A4", volume=100)
 # Drum motor initialization
 FIRST_MOTOR = Motor("A")
 SECOND_MOTOR = Motor("B")
@@ -38,7 +36,7 @@ emergency_stop = False
 IN_POWER = 50
 OUT_POWER = 30
 OUT_POWER_2 = 50
-IN_TIME = 5
+IN_TIME = 2
 OUT_TIME = 0.3
 OUT_TIME_2 = 5
 
@@ -48,7 +46,7 @@ TURN_MEDIUM_POWER = 18
 TURN_SLOW_POWER = 10
 TURN_FINE_POWER = 7
 TURN_MIN_POWER = 10
-TURN_TOLERANCE = 1.5
+TURN_TOLERANCE = 0.5
 
 GYRO_SETTLE_TIME = 0.1
 GYRO_START_SAMPLES = 7
@@ -69,7 +67,7 @@ STALL_BOOST_POWER = 14
 STALL_MAX_BOOSTS = 3
 
 # Logging controls
-ENABLE_TURN_LOG = True
+ENABLE_TURN_LOG = False
 TURN_LOG_EVERY_N_LOOPS = 5
 TURN_LOG_FLUSH = True
 
@@ -84,6 +82,10 @@ def log_turn(msg):
     if ENABLE_TURN_LOG:
         print(msg, flush=TURN_LOG_FLUSH)
 
+def play_sound():
+    "Play a single note."
+    SOUND.play()
+    SOUND.wait_done()
 
 def stop_drive():
     LEFT_MOTOR.set_power(0)
@@ -231,13 +233,13 @@ def set_turn_power(direction, base_power, translation_correction):
 
 def is_color(color, r, g, b):
     if color == "red":
-        return r > 140 and r > (g * 6) and r > (b * 7)
+        return r > 150 and r < 175 and g > 15 and g < 30 and b > 10 and b < 20
 
     elif color == "green":
-        return g > 180 and g > (r * 1.5) and g > (b * 5.5)
+        return g > 190 and g < 205 and r > 115 and r < 135 and 
 
     elif color == "orange":
-        return r > 200 and g > 100 and r > (b * 3) and g > (b * 2)
+        return r > 270 and r < 290 and g < 110 and g > 90 and b < 25 and b > 15 
 
     else:
         return False
@@ -395,6 +397,15 @@ def turn(direction, angle=90):
     )
     log_turn("=" * 80)
 
+def global_turn(direction, target_angle):
+    curr_angle = get_stable_gyro_angle()
+    if curr_angle is None:
+        raise RuntimeError("Gyro unavailable")
+    angle = target_angle - curr_angle if direction == "right" else curr_angle - target_angle
+    log_turn(f"Global turn: current={curr_angle:.2f}  target={target_angle:.2f} angle = {angle:.2f}")
+    turn(direction, angle)
+    safe_sleep(0.1)
+
 def go_forward_target_slow(
     target_degrees,
     max_power=40,
@@ -418,10 +429,10 @@ def go_forward_target_slow(
     if target_angle is None:
         raise RuntimeError("Gyro unavailable")
     
+    DETECTED_COLOR = None
+
     while True:
         check_emergency()
-
-        DETECTED_COLOR = None
        
         ############ COLOR STUFF
         if target_color is not None:
@@ -484,6 +495,14 @@ def color_test():
         (r, g, b) = COLOR.get_rgb()
         print(f"Color RGB: R={r} G={g} B={b}")
         safe_sleep(0.5)
+
+def search():
+    DETECTED = go_forward_target_slow(target_degrees= -880,target_color = "bed")
+    if DETECTED == "green":
+        go_forward_target_slow(target_degrees=TESTD1)
+        turn("left")
+        turn("left")
+        grab_out(30, 0.3)
 
 # if __name__ == "__main__":
 #     try:
