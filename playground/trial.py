@@ -52,9 +52,16 @@ if __name__ == "__main__":
             if start:
                 #go_forward_target_slow(D10)
                 #turn("right")
-                color_test()
-                grab_in_forward(move_power=10)
+                #color_test()
+                #backward_orange_test()
+                #orange_test()
+                #bed_test()
+                #go_forward_target_slow(D1, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, 'green')
+                #backward_orange_test()
+                grab_in_forward(move_power=7)
+                safe_sleep(1)
                 turn("left")
+                safe_sleep(1)
                 go_forward_target_slow(D1, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
                 turn("right")
 

@@ -41,12 +41,12 @@ OUT_TIME = 0.3
 OUT_TIME_2 = 5
 
 # Gyro turning constants
-TURN_FAST_POWER = 30
-TURN_MEDIUM_POWER = 18
-TURN_SLOW_POWER = 10
-TURN_FINE_POWER = 7
-TURN_MIN_POWER = 10
-TURN_TOLERANCE = 0.5
+TURN_FAST_POWER = 25
+TURN_MEDIUM_POWER = 10
+TURN_SLOW_POWER = 8
+TURN_FINE_POWER = 8
+TURN_MIN_POWER = 8
+TURN_TOLERANCE = 1
 
 GYRO_SETTLE_TIME = 0.1
 GYRO_START_SAMPLES = 7
@@ -67,7 +67,7 @@ STALL_BOOST_POWER = 14
 STALL_MAX_BOOSTS = 3
 
 # Logging controls
-ENABLE_TURN_LOG = False
+ENABLE_TURN_LOG = True
 TURN_LOG_EVERY_N_LOOPS = 5
 TURN_LOG_FLUSH = True
 
@@ -233,13 +233,13 @@ def set_turn_power(direction, base_power, translation_correction):
 
 def is_color(color, r, g, b):
     if color == "red":
-        return r > 150 and r < 175 and g > 15 and g < 30 and b > 10 and b < 20
+        return r > 160 and r < 190 and g > 10 and g < 35 and b > 0 and b < 30
 
     elif color == "green":
-        return g > 190 and g < 205 and r > 115 and r < 135 and 
+        return r > 115 and r < 155 and g > 190 and g < 220 and b > 15 and b < 45 
 
     elif color == "orange":
-        return r > 270 and r < 290 and g < 110 and g > 90 and b < 25 and b > 15 
+        return r > 245 and r < 275 and g > 80 and g < 110 and b > 5 and b < 35 
 
     else:
         return False
@@ -438,6 +438,8 @@ def go_forward_target_slow(
         if target_color is not None:
             (r, g, b) = COLOR.get_rgb()
      
+            print("Current rgb:", r, g, b)
+
             if target_color == "bed":
                 if is_color("red", r, g, b):
                     print("Target color detected: red")
