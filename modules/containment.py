@@ -20,7 +20,7 @@ from modules.locomotion import *
 IN_POWER = 50
 OUT_POWER = 30
 OUT_POWER_2 = 50
-IN_TIME = 5
+IN_TIME = 2
 OUT_TIME = 0.3
 OUT_TIME_2 = 5             
 
@@ -33,7 +33,7 @@ BLOW1 = True
 BLOW2 = True
 
 # MOVEMENT CONSTANTS
-DISTANCE = 10
+DISTANCE = -290
 MAX_POWER = 30
 MIN_POWER = 15
 SLOWDOWN_DIST = 300
