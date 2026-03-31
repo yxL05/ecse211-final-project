@@ -19,8 +19,8 @@ LEFT_LOCOMOTION_MOTOR = Motor("C")
 RIGHT_LOCOMOTION_MOTOR = Motor("D")
 
 # Sensors
-GYRO = EV3GyroSensor(1, mode="both")
-COLOR = EV3ColorSensor(2)
+GYRO = EV3GyroSensor(4, mode="both")
+COLOR = EV3ColorSensor(1)
 
 # Buttons
 EMERGENCY_BUTTON = TouchSensor(2)

@@ -28,14 +28,14 @@ OUT_TIME_2 = 5
 
 # Gyro turning constants
 TURN_FAST_POWER = 30
-TURN_MEDIUM_POWER = 18
-TURN_SLOW_POWER = 10
-TURN_FINE_POWER = 7
-TURN_MIN_POWER = 10
-TURN_TOLERANCE = 0.2
+TURN_MEDIUM_POWER = 20
+TURN_SLOW_POWER = 15
+TURN_FINE_POWER = 13
+TURN_MIN_POWER = 13
+TURN_TOLERANCE = 1.5
 
 GYRO_SETTLE_TIME = 0.1
-GYRO_START_SAMPLES = 7
+GYRO_START_SAMPLES = 20
 GYRO_LOOP_SAMPLES = 3
 GYRO_SAMPLE_DELAY = 0.005
 
@@ -52,8 +52,16 @@ STALL_TIME = 0.30
 STALL_BOOST_POWER = 14
 STALL_MAX_BOOSTS = 3
 
+TURN_LOG_EVERY_N_LOOPS = 5
+TURN_LOG_FLUSH = True
+
 def _clamp(x, lo, hi):
     return max(lo, min(hi, x))
+
+
+def _log_turn(debug, msg):
+    if debug:
+        print(msg, flush=TURN_LOG_FLUSH)
 
 
 def _get_gyro_angle():
@@ -131,7 +139,7 @@ def _is_color(color, r, g, b):
         return False
 
 
-def turn(direction, angle=90):
+def turn(direction, angle=90, debug=True):
     if direction not in ("left", "right"):
         raise ValueError("direction must be 'left' or 'right'")
     if angle <= 0:
@@ -167,21 +175,37 @@ def turn(direction, angle=90):
     last_right_enc = 0
     stall_boosts_used = 0
 
+    _log_turn(debug, "")
+    _log_turn(debug, "=" * 80)
+    _log_turn(
+        debug,
+        f"TURN START  direction={direction}  requested_angle={angle:.2f}  "
+        f"start_angle={start_angle:.2f}  target_angle={target_angle:.2f}"
+    )
 
     while True:
         check_emergency()
         loop_count += 1
 
         current_angle = _get_stable_gyro_angle(
-            samples = GYRO_LOOP_SAMPLES,
-            delay = GYRO_SAMPLE_DELAY
+            samples=GYRO_LOOP_SAMPLES,
+            delay=GYRO_SAMPLE_DELAY
         )
+        if current_angle is None:
+            if loop_count % TURN_LOG_EVERY_N_LOOPS == 0:
+                _log_turn(debug, f"[loop {loop_count}] current_angle=None")
+            continue
 
 
         angle_error = target_angle - current_angle
 
         if abs(angle_error) <= TURN_TOLERANCE:
             exit_reason = "tolerance"
+            _log_turn(
+                debug,
+                f"TURN EXIT   reason={exit_reason}  loop={loop_count}  "
+                f"current_angle={current_angle:.2f}  angle_error={angle_error:.2f}"
+            )
             break
 
         base_power = _get_turn_power_from_error(angle_error)
@@ -217,6 +241,13 @@ def turn(direction, angle=90):
             applied_base_power = max(base_power, STALL_BOOST_POWER)
             stall_boosts_used += 1
             last_progress_time = time.time()
+            _log_turn(
+                debug,
+                f"STALL RECOVERY  loop={loop_count}  "
+                f"curr={current_angle:.2f}  err={angle_error:.2f}  "
+                f"base={base_power:.2f} -> boost={applied_base_power:.2f}  "
+                f"Lenc={left_enc:.2f}  Renc={right_enc:.2f}"
+            )
 
 
         left_cmd, right_cmd = _set_turn_power(
@@ -225,16 +256,55 @@ def turn(direction, angle=90):
             translation_correction
         )
 
+        if loop_count % TURN_LOG_EVERY_N_LOOPS == 0:
+            elapsed = time.time() - turn_start_time
+            _log_turn(
+                debug,
+                f"[loop {loop_count:03d} | {elapsed:6.3f}s] "
+                f"curr={current_angle:8.2f}  target={target_angle:8.2f}  "
+                f"err={angle_error:7.2f}  base={base_power:5.2f}  "
+                f"used={applied_base_power:5.2f}  "
+                f"Lenc={left_enc:8.2f}  Renc={right_enc:8.2f}  "
+                f"Terr={translation_error:8.2f}  Tcorr={translation_correction:6.2f}  "
+                f"Lcmd={left_cmd:6.2f}  Rcmd={right_cmd:6.2f}"
+            )
+
         # If still stalled after several boosts, give up cleanly
         if stalled and stall_boosts_used >= STALL_MAX_BOOSTS:
             exit_reason = "stall"
-
+            _log_turn(
+                debug,
+                f"TURN EXIT   reason={exit_reason}  loop={loop_count}  "
+                f"current_angle={current_angle:.2f}  angle_error={angle_error:.2f}"
+            )
             break
 
         time.sleep(0.01)
 
     stop_drive()
     safe_sleep(0.05)
+
+    final_angle = _get_stable_gyro_angle(samples=GYRO_LOOP_SAMPLES, delay=GYRO_SAMPLE_DELAY)
+    final_left_enc = LEFT_LOCOMOTION_MOTOR.get_encoder()
+    final_right_enc = RIGHT_LOCOMOTION_MOTOR.get_encoder()
+    final_translation_error = final_left_enc + final_right_enc
+
+    _log_turn(
+        debug,
+        f"TURN END    reason={exit_reason}  loops={loop_count}  "
+        f"final_angle={final_angle if final_angle is not None else 'None'}  "
+        f"final_Lenc={final_left_enc:.2f}  final_Renc={final_right_enc:.2f}  "
+        f"final_Terr={final_translation_error:.2f}"
+    )
+    _log_turn(debug, "=" * 80)
+
+def global_turn(direction, target_angle):
+    curr_angle = _get_stable_gyro_angle()
+    if curr_angle is None:
+        raise RuntimeError("Gyro unavailable")
+    angle = target_angle - curr_angle if direction == "right" else curr_angle - target_angle
+    turn(direction, angle)
+    safe_sleep(0.1)
 
 def go_forward_target_slow(
     target_degrees,
@@ -308,7 +378,7 @@ def go_forward_target_slow(
         if current_angle is None:
             continue
         heading_error = target_angle - current_angle
-        correction = kp_heading * heading_error * 0.90
+        correction = kp_heading * heading_error
         left_power = _clamp(power + correction, -100, 100)
         right_power = _clamp(power - correction, -100, 100)
 

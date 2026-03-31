@@ -33,23 +33,14 @@ BLOW1 = True
 BLOW2 = True
 
 # MOVEMENT CONSTANTS
-DISTANCE = -290
-MAX_POWER = 30
-MIN_POWER = 15
+SUCK_FORWARD_DISTANCE = 100
+DISTANCE = 450
+FALLBACK_DISTANCE = -100
+MAX_POWER = 40
+MIN_POWER = 20
+SUCK_FORWARD_POWER = 10
 SLOWDOWN_DIST = 300
-KP_HEADING = 1.2
-
-def _suck_forward(move_power, grab_power=IN_POWER, t=IN_TIME):    
-    LEFT_CONTAINMENT_MOTOR.set_power(grab_power)
-    RIGHT_CONTAINMENT_MOTOR.set_power(grab_power)
-
-    LEFT_LOCOMOTION_MOTOR.set_power(move_power)
-    RIGHT_LOCOMOTION_MOTOR.set_power(move_power)
-
-    safe_sleep(t) 
-
-    stop_drive()
-    stop_grab()
+KP_HEADING = 1.7
 
 def _blow(power=OUT_POWER, t=OUT_TIME):
     go_forward_target_slow(DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
@@ -58,16 +49,24 @@ def _blow(power=OUT_POWER, t=OUT_TIME):
     RIGHT_CONTAINMENT_MOTOR.set_power(power * -1)
     safe_sleep(t)
     stop_grab()
+    play_sound()
+    go_forward_target_slow(FALLBACK_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
     turn("right", 180)
     safe_sleep(1)
 
 def suck_forward():
-    _suck_forward(move_power=10)
+    LEFT_CONTAINMENT_MOTOR.set_power(IN_POWER)
+    RIGHT_CONTAINMENT_MOTOR.set_power(IN_POWER)
+
+    go_forward_target_slow(SUCK_FORWARD_DISTANCE, SUCK_FORWARD_POWER, KP_HEADING, SUCK_FORWARD_POWER, SLOWDOWN_DIST)
+
+    stop_drive()
+    stop_grab()
 
 def search(SEARCH_DISTANCE):
+    global BLOW1, BLOW2
     DETECTED = go_forward_target_slow(SEARCH_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, BED)
     if DETECTED == GREEN:
-        play_sound()
         if BLOW1:
             _blow()
             BLOW1 = False
@@ -79,7 +78,7 @@ def search(SEARCH_DISTANCE):
 if __name__ == "__main__":
     while True:
         wait_ready_sensors()
-        _suck_forward(move_power=10)
+        suck_forward()
         time.sleep(3)
         _blow()
         time.sleep(3)
