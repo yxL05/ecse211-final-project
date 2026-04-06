@@ -306,7 +306,7 @@ def global_turn(direction, target_angle):
     turn(direction, angle)
     safe_sleep(0.1)
 
-def go_forward_target_slow(
+def straight(
     target_degrees,
     max_power=40,
     kp_heading=1.2,

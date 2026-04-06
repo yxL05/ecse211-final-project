@@ -7,7 +7,7 @@ from modules.containment import search
 from modules.hardware import GYRO
 from utils.brick import wait_ready_sensors
 
-from modules.locomotion import global_turn, go_forward_target_slow, turn
+from modules.locomotion import global_turn, straight, turn
 from modules.stop import check_emergency, safe_sleep, stop_all
 
 if __name__ == "__main__":
