@@ -3,7 +3,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from modules.containment import search
+from modules.main import SEARCH_HORIZONTAL_DISTANCE, SEARCH_INTO_ROOM_DISTANCE, SEARCH_OUT_OF_DOOR_DISTANCE, SEARCH_RESET_AT_DOOR_DISTANCE, SEARCH_UNTIL_DOOR_DISTANCE
+from modules.containment import KP_HEADING, MAX_POWER, MIN_POWER, ORANGE, SLOWDOWN_DIST, search, suck_forward
 from modules.hardware import GYRO
 from utils.brick import wait_ready_sensors
 
@@ -14,15 +15,16 @@ if __name__ == "__main__":
     wait_ready_sensors()
     
     try:
-        while True:
-            check_emergency()
-            global_turn("left", -360)
-            safe_sleep(2)
-            global_turn("left", -720)
-            safe_sleep(2)
-            global_turn("right", 0)
-            safe_sleep(2)
-
+        suck_forward()
+         # Search: snake pattern in big room
+        for i in range(5):
+            straight(SEARCH_UNTIL_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
+            search(SEARCH_INTO_ROOM_DISTANCE, SEARCH_RESET_AT_DOOR_DISTANCE)
+            if i != 4:
+                straight(SEARCH_OUT_OF_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+                global_turn("left", -90)
+                straight(SEARCH_HORIZONTAL_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+                global_turn("right", 0)
     except Exception as e:
         stop_all()
         print(f"{e}")

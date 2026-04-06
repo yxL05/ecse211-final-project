@@ -63,17 +63,20 @@ def suck_forward():
     stop_drive()
     stop_grab()
 
-def search(SEARCH_DISTANCE):
+def search(SEARCH_DISTANCE, SEARCH_RESET_AT_DOOR_DISTANCE):
     global BLOW1, BLOW2
-    DETECTED = straight(SEARCH_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, BED)
-    if DETECTED == GREEN:
+    detected = straight(SEARCH_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, BED)
+    if detected == GREEN:
         if BLOW1:
             _blow()
             BLOW1 = False
         else:
             _blow(OUT_POWER_2, OUT_TIME_2)
             BLOW2 = False
-        return (BLOW1, BLOW2)
+    found_door = straight(SEARCH_RESET_AT_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
+    if not found_door:
+        straight(-2 * SEARCH_RESET_AT_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
+    return detected
     
 if __name__ == "__main__":
     while True:

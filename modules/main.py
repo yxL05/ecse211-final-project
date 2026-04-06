@@ -27,10 +27,10 @@ NAVIGATION3_DISTANCE3 = -700
 NAVIGATION4_DISTANCE1 = 1450
 
 SEARCH_INTO_ROOM_DISTANCE = -1050
-SEARCH_RESET_AT_DOOR_DISTANCE = 1500
+SEARCH_RESET_AT_DOOR_DISTANCE = 1000
 SEARCH_OUT_OF_DOOR_DISTANCE = 200
 SEARCH_UNTIL_DOOR_DISTANCE = -700
-SEARCH_HORIZONTAL_DISTANCE = -300
+SEARCH_HORIZONTAL_DISTANCE = -100
 
 LEFT = "left"
 RIGHT = "right"
@@ -56,16 +56,22 @@ if __name__ == "__main__":
             straight(NAVIGATION_TO_BIG_ROOM, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
             global_turn("right", -90)
             
+            i = 0
+            while i < 5:
             # Search: snake pattern in big room
-            for i in range(3):
                 straight(SEARCH_UNTIL_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
-                search(SEARCH_INTO_ROOM_DISTANCE)
-                straight(SEARCH_RESET_AT_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
-                if i != 2:
+                detected = search(SEARCH_INTO_ROOM_DISTANCE, SEARCH_RESET_AT_DOOR_DISTANCE)
+                if i != 4:
                     straight(SEARCH_OUT_OF_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
                     global_turn("left", -180)
-                    straight(SEARCH_HORIZONTAL_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+
+                    if detected == GREEN:
+                        straight(3 * SEARCH_HORIZONTAL_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
+                        i += 1
+                    else:
+                        straight(SEARCH_HORIZONTAL_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
                     global_turn("right", -90)
+                i += 1
 
             # Navigation: out of big room -> go to room 2
             straight(NAVIGATION_OUT_OF_BIG_ROOM, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
@@ -75,8 +81,7 @@ if __name__ == "__main__":
             straight(NAVIGATION_ROOM_2_TO_DOOR, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
 
             # Search: room 2
-            search(SEARCH_INTO_ROOM_DISTANCE)
-            straight(SEARCH_RESET_AT_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
+            search(SEARCH_INTO_ROOM_DISTANCE, SEARCH_RESET_AT_DOOR_DISTANCE)
 
             # Navigation: go to room 1
             straight(NAVIGATION3_DISTANCE1, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
@@ -86,8 +91,7 @@ if __name__ == "__main__":
             straight(NAVIGATION3_DISTANCE3, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
 
             # Search: room 1
-            search(SEARCH_INTO_ROOM_DISTANCE)
-            straight(SEARCH_RESET_AT_DOOR_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST, ORANGE)
+            search(SEARCH_INTO_ROOM_DISTANCE, SEARCH_RESET_AT_DOOR_DISTANCE)
 
             # Navigation: straight line to spawn -> play victory sound
             straight(NAVIGATION4_DISTANCE1, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
