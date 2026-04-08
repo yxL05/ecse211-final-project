@@ -13,6 +13,8 @@ def safe_sleep(duration, interval=0.01):
     while time.time() < end_time:
         check_emergency()
         remaining = end_time - time.time()
+        if remaining <= 0:
+            break
         time.sleep(min(interval, remaining))
 
 def stop_drive():

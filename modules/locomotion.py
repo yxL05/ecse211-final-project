@@ -127,13 +127,13 @@ def _set_turn_power(direction, base_power, translation_correction):
 
 def _is_color(color, r, g, b):
     if color == "red":
-        return r > 140 and r > (g * 6) and r > (b * 7)
+        return r > 175 and g < 35 and b < 35
 
     elif color == "green":
-        return g > 180 and g > (r * 1.5) and g > (b * 5.5)
+        return g > 200 and r < 175 and b < 40
 
     elif color == "orange":
-        return r > 200 and g < 100 and b < 25 and g > 80
+        return r > 200 and g < 120 and b < 25 and g > 90
 
     else:
         return False
@@ -192,8 +192,6 @@ def turn(direction, angle=90, debug=True):
             delay=GYRO_SAMPLE_DELAY
         )
         if current_angle is None:
-            if loop_count % TURN_LOG_EVERY_N_LOOPS == 0:
-                _log_turn(debug, f"[loop {loop_count}] current_angle=None")
             continue
 
 
@@ -256,19 +254,6 @@ def turn(direction, angle=90, debug=True):
             translation_correction
         )
 
-        if loop_count % TURN_LOG_EVERY_N_LOOPS == 0:
-            elapsed = time.time() - turn_start_time
-            _log_turn(
-                debug,
-                f"[loop {loop_count:03d} | {elapsed:6.3f}s] "
-                f"curr={current_angle:8.2f}  target={target_angle:8.2f}  "
-                f"err={angle_error:7.2f}  base={base_power:5.2f}  "
-                f"used={applied_base_power:5.2f}  "
-                f"Lenc={left_enc:8.2f}  Renc={right_enc:8.2f}  "
-                f"Terr={translation_error:8.2f}  Tcorr={translation_correction:6.2f}  "
-                f"Lcmd={left_cmd:6.2f}  Rcmd={right_cmd:6.2f}"
-            )
-
         # If still stalled after several boosts, give up cleanly
         if stalled and stall_boosts_used >= STALL_MAX_BOOSTS:
             exit_reason = "stall"
@@ -303,6 +288,11 @@ def global_turn(direction, target_angle):
     if curr_angle is None:
         raise RuntimeError("Gyro unavailable")
     angle = target_angle - curr_angle if direction == "right" else curr_angle - target_angle
+    _log_turn(
+        True,
+        f"GLOBAL TURN  direction={direction}  input_target_angle={target_angle:.2f}  "
+        f"current_angle={curr_angle:.2f}  angle_to_turn={angle:.2f}"
+    )
     turn(direction, angle)
     safe_sleep(0.1)
 

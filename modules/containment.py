@@ -33,7 +33,7 @@ BLOW1 = True
 BLOW2 = True
 
 # MOVEMENT CONSTANTS
-SUCK_FORWARD_DISTANCE = 150
+SUCK_FORWARD_DISTANCE = 170
 DISTANCE = 450
 FALLBACK_DISTANCE = -100
 MAX_POWER = 40
@@ -52,6 +52,7 @@ def _blow(power=OUT_POWER, t=OUT_TIME):
     play_sound()
     straight(FALLBACK_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
     turn("right", 180)
+    straight(3 * FALLBACK_DISTANCE, MAX_POWER, KP_HEADING, MIN_POWER, SLOWDOWN_DIST)
     safe_sleep(1)
 
 def suck_forward():
@@ -73,7 +74,7 @@ def search(SEARCH_DISTANCE):
         else:
             _blow(OUT_POWER_2, OUT_TIME_2)
             BLOW2 = False
-        return (BLOW1, BLOW2)
+    return DETECTED
     
 if __name__ == "__main__":
     while True:
